@@ -1,8 +1,9 @@
 # PHP compile
-Shell script collection for compiling latest [PHP](https://php.net) from source.
+Shell script for compiling latest [PHP](https://php.net) from source.
 
 ## Usage
 ```shell
+cd /usr/local/src
 git clone https://github.com/Fleshgrinder/php-compile
 sh php-compile/compile.sh
 ```
