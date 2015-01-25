@@ -31,20 +31,36 @@
 # Script to compile PHP from source.
 #
 # AUTHOR: Richard Fussenegger <richard@fussenegger.info>
-# LICENSE: Unlicense
+# COPYRIGHT: Copyright (c) 2015 Richard Fussenegger
+# LICENSE: http://unlicense.org/ PD
+# LINK: http://richard.fussenegger.info/
 # ------------------------------------------------------------------------------
 
 # Check return status of every command.
 set -e
 
+
+# ------------------------------------------------------------------------------ Variables
+
+
+# Make sure that no questions are asked by the operatin system.
+export DEBIAN_FRONTEND='noninteractive'
+
+# For more information on shell colors and other text formatting see:
+# http://stackoverflow.com/a/4332530/1251219
+readonly RED=$(tput bold; tput setaf 1)
+readonly GREEN=$(tput bold; tput setaf 2)
+readonly YELLOW=$(tput bold; tput setaf 3)
+readonly NORMAL=$(tput sgr0)
+
+
+# ------------------------------------------------------------------------------ Functions
+
+
 # Print usage text.
-#
-# RETURN:
-#  0 - Printing successful.
-#  1 - Printing failed.
 usage()
 {
-    cat <<EOT
+    cat << EOT
 Usage: ${0##*/} [OPTION]...
 Compile and install PHP from source.
 
@@ -55,6 +71,10 @@ GitHub repository: https://githbu.com/Fleshgrinder/php-compile
 For complete documentation, see: README.md
 EOT
 }
+
+
+# ------------------------------------------------------------------------------
+
 
 # Check for possibly passed options.
 while getopts 'h' OPT
@@ -70,21 +90,11 @@ done
 
 # Remove possibly passed end of options marker.
 if [ "${1}" = "--" ]
-then shift $(( $OPTIND - 1 ))
+    then shift $(( $OPTIND - 1 ))
 fi
-
-# For more information on shell colors and other text formatting see:
-# http://stackoverflow.com/a/4332530/1251219
-readonly RED=$(tput bold; tput setaf 1)
-readonly GREEN=$(tput bold; tput setaf 2)
-readonly YELLOW=$(tput bold; tput setaf 3)
-readonly NORMAL=$(tput sgr0)
 
 # Include user configurable configuration.
 . "$(cd -- "$(dirname -- "${0}")"; pwd)"/config.sh
-
-# Make sure that no questions are asked by the operatin system.
-export DEBIAN_FRONTEND=noninteractive
 
 # Make sure package sources are up-to-date.
 apt-get --yes -- update
@@ -123,7 +133,7 @@ fi
 
 # The GMP header files are installed in a path PHP will not search at.
 if [ !-e '/usr/include/gmp.h' ]
-then ln --symbolic '/usr/include/x86_64-linux-gnu/gmp.h' '/usr/include/gmp.h'
+    then ln --symbolic '/usr/include/x86_64-linux-gnu/gmp.h' '/usr/include/gmp.h'
 fi
 
 printf -- 'Installing PHP %s ...\n' "${YELLOW}${PHP_VERSION}${NORMAL}"
