@@ -39,12 +39,37 @@
 # Check return status of every command.
 set -e
 
+# ------------------------------------------------------------------------------
+#                                                    User configurable variables
+# ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ Variables
+# Version string of the PHP release that should be compiled and installed.
+readonly PHP_VERSION='5.6.5'
 
+# PHP-FPM system user.
+readonly PHP_FPM_USER='www-data'
+
+# PHP-FPM system group.
+readonly PHP_FPM_GROUP='www-data'
+
+# The bison version required to compile PHP.
+readonly BISON_MAX_VERSION='3.0'
+
+# Absolute path to the configuration files.
+readonly CONFIGURATION_DIRECTORY='/etc/php'
+
+# Absolute path to the directory where source files should be kept.
+readonly SOURCE_DIRECTORY='/usr/local/src'
+
+# ------------------------------------------------------------------------------
+#                                                               System variables
+# ------------------------------------------------------------------------------
 
 # Make sure that no questions are asked by the operatin system.
 export DEBIAN_FRONTEND='noninteractive'
+
+# Absolute path to the directory of the current script.
+readonly __DIRNAME__="$(cd -- "$(dirname -- "${0}")"; pwd)"
 
 # For more information on shell colors and other text formatting see:
 # http://stackoverflow.com/a/4332530/1251219
@@ -53,9 +78,20 @@ readonly GREEN=$(tput bold; tput setaf 2)
 readonly YELLOW=$(tput bold; tput setaf 3)
 readonly NORMAL=$(tput sgr0)
 
+# ------------------------------------------------------------------------------
+#                                                                      Functions
+# ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ Functions
-
+# Install bison 2.7.1
+install_bison()
+{
+    # We need an older version of bison to compile PHP: http://askubuntu.com/a/461961
+    wget -- 'http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb'
+    wget -- 'http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb'
+    dpkg -i 'libbison-dev_2.7.1.dfsg-1_amd64.deb'
+    dpkg -i 'bison_2.7.1.dfsg-1_amd64.deb'
+    rm --force -- 'libbison-dev_2.7.1.dfsg-1_amd64.deb' 'bison_2.7.1.dfsg-1_amd64.deb'
+}
 
 # Print usage text.
 usage()
@@ -72,9 +108,9 @@ For complete documentation, see: README.md
 EOT
 }
 
-
 # ------------------------------------------------------------------------------
-
+#                                                                          Logic
+# ------------------------------------------------------------------------------
 
 # Check for possibly passed options.
 while getopts 'h' OPT
@@ -93,13 +129,10 @@ if [ "${1}" = "--" ]
     then shift $(( $OPTIND - 1 ))
 fi
 
-# Include user configurable configuration.
-. "$(cd -- "$(dirname -- "${0}")"; pwd)"/config.sh
+printf -- 'Updating package sources ...\n'
+apt-get --yes -- update 1>/dev/null
 
-# Make sure package sources are up-to-date.
-apt-get --yes -- update
-
-# Install required software for PHP compilation.
+printf -- 'Installing dependencies ...\n'
 apt-get --yes -- install \
     autoconf             \
     automake             \
@@ -118,21 +151,26 @@ apt-get --yes -- install \
     re2c                 \
     wget
 
-# Check if bison is installed at all and if it is if the version is low enough for PHP.
-if [ ! type bison ] || [ $(bison --version | grep --only-matching -- '[0-9]\.[0-9]') != '2.7' ]
+if type bison
 then
-    apt-get --yes -- purge bison
+    printf -- 'Found bison binary ...\n'
 
-    # We need an older version of bison to compile PHP: http://askubuntu.com/a/461961
-    wget -- 'http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb'
-    wget -- 'http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb'
-    dpkg -i 'libbison-dev_2.7.1.dfsg-1_amd64.deb'
-    dpkg -i 'bison_2.7.1.dfsg-1_amd64.deb'
-    rm --force -- 'libbison-dev_2.7.1.dfsg-1_amd64.deb' 'bison_2.7.1.dfsg-1_amd64.deb'
+    # Get the version fromt he installed bison binary and remove the dots.
+    BISON_VERSION=$(bison --version | grep --only-matching -- '[0-9]\.[0-9]' | tr --delete .)
+    if [ "${BISON_VERSION}" -ge $(tr --delete . "${BISON_MAX_VERSION}") ]
+    then
+        printf -- 'Installed bison version exceeds maximum version %s!\n' "${RED}${BISON_MAX_VERSION}${NORMAL}"
+        printf -- 'Purging bison installation.\n'
+        apt-get --yes -- purge bison
+        install_bison
+    fi
+else
+    printf -- 'Installing bison %s2.7.1%s ...\n' "${GREEN}" "${NORMAL}"
+    install_bison
 fi
 
 # The GMP header files are installed in a path PHP will not search at.
-if [ !-e '/usr/include/gmp.h' ]
+if [ ! -e '/usr/include/gmp.h' ]
     then ln --symbolic '/usr/include/x86_64-linux-gnu/gmp.h' '/usr/include/gmp.h'
 fi
 
@@ -180,8 +218,8 @@ LDFLAGS='' \
     --enable-pcntl \
     --enable-re2c-cgoto \
     --enable-zip \
-    --sysconfdir='/etc/php' \
-    --with-config-file-path='/etc/php' \
+    --sysconfdir="${CONFIGURATION_DIRECTORY}" \
+    --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
     --with-curl \
     --with-fpm-group="${PHP_FPM_GROUP}" \
     --with-fpm-user="${PHP_FPM_USER}" \
@@ -189,7 +227,6 @@ LDFLAGS='' \
     --with-gmp \
     --with-jpeg-dir \
     --with-mcrypt \
-    --with-mysql-sock='/run/mysql.sock' \
     --with-mysqli=mysqlnd \
     --with-openssl \
     --with-pdo-mysql=mysqlnd \
@@ -205,4 +242,14 @@ make clean
 make
 make install
 
-printf -- '[%sok%s] Installation finished.\n' "${GREEN}" "${NORMAL}"
+cat << EOT
+
+[${GREEN}ok${NORMAL}] Installation finished.
+
+CONFIG: ${YELLOW}${CONFIGURATION_DIRECTORY}${NORMAL}
+
+You may want to delete the source files in ${YELLOW}${SOURCE_DIRECTORY}${NORMAL}.
+
+EOT
+
+exit 0
