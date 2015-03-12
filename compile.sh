@@ -220,6 +220,7 @@ LDFLAGS='' \
     --enable-zip \
     --sysconfdir="${CONFIGURATION_DIRECTORY}" \
     --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
+    --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/conf-enabled" \
     --with-curl \
     --with-fpm-group="${PHP_FPM_GROUP}" \
     --with-fpm-user="${PHP_FPM_USER}" \
