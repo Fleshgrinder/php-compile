@@ -44,7 +44,7 @@ set -e
 # ------------------------------------------------------------------------------
 
 # Version string of the PHP release that should be compiled and installed.
-readonly PHP_VERSION='5.6.5'
+readonly PHP_VERSION='5.6.6'
 
 # PHP-FPM system user.
 readonly PHP_FPM_USER='www-data'
