@@ -185,7 +185,7 @@ readonly PHP_SOURCE="${SOURCE_DIRECTORY}/php"
 if [ -d "${PHP_SOURCE}/.git" ]
 then
     cd -- "${PHP_SOURCE}"
-    git pull
+    git checkout "PHP-${PHP_VERSION}"
 else
     rm --recursive --force -- "${PHP_SOURCE}"
     git clone --branch "PHP-${PHP_VERSION}" --depth 1 --single-branch -- https://github.com/php/php-src.git "${PHP_SOURCE}"
