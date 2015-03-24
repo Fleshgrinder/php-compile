@@ -44,22 +44,22 @@ set -e
 # ------------------------------------------------------------------------------
 
 # Version string of the PHP release that should be compiled and installed.
-readonly PHP_VERSION='5.6.6'
+PHP_VERSION='5.6.7'
 
 # PHP-FPM system user.
-readonly PHP_FPM_USER='www-data'
+PHP_FPM_USER='www-data'
 
 # PHP-FPM system group.
-readonly PHP_FPM_GROUP='www-data'
+PHP_FPM_GROUP='www-data'
 
 # The bison version required to compile PHP.
 readonly BISON_MAX_VERSION='3.0'
 
 # Absolute path to the configuration files.
-readonly CONFIGURATION_DIRECTORY='/etc/php'
+CONFIGURATION_DIRECTORY='/etc/php'
 
 # Absolute path to the directory where source files should be kept.
-readonly SOURCE_DIRECTORY='/usr/local/src'
+SOURCE_DIRECTORY='/usr/local/src'
 
 # ------------------------------------------------------------------------------
 #                                                               System variables
@@ -100,7 +100,12 @@ usage()
 Usage: ${0##*/} [OPTION]...
 Compile and install PHP from source.
 
+    -c  Configuration directory, defaults to ${YELLOW}${CONFIGURATION_DIRECTORY}${NORMAL}.
+    -g  PHP-FPM group, defaults to ${YELLOW}${PHP_FPM_GROUP}${NORMAL}.
     -h  Display this help and exit.
+    -s  Source directory, defaults to ${YELLOW}${SOURCE_DIRECTORY}${NORMAL}.
+    -u  PHP-FPM username, defaults to ${YELLOW}${PHP_FPM_USER}${NORMAL}.
+    -v  PHP version, defaults to ${YELLOW}${PHP_VERSION}${NORMAL}.
 
 Report bugs to richard@fussenegger.info
 GitHub repository: https://githbu.com/Fleshgrinder/php-compile
@@ -113,10 +118,15 @@ EOT
 # ------------------------------------------------------------------------------
 
 # Check for possibly passed options.
-while getopts 'h' OPT
+while getopts 'c:g:hs:u:v:' OPT
 do
     case "${OPT}" in
-        h|[?]) usage && exit 0 ;;
+        c) CONFIGURATION_DIRECTORY="${OPTARG}" ;;
+        g) PHP_FPM_GROUP="${OPTARG}" ;;
+        h) usage && exit 0 ;;
+        s) SOURCE_DIRECTORY="${OPTARG}" ;;
+        u) PHP_FPM_USER="${OPTARG}" ;;
+        v) PHP_VERSION="${OPTARG}" ;;
     esac
 
     # We have to remove found options from the input for later evaluations of
@@ -128,6 +138,13 @@ done
 if [ "${1}" = "--" ]
     then shift $(( $OPTIND - 1 ))
 fi
+
+# Make all variables read only.
+readonly CONFIGURATION_DIRECTORY;
+readonly PHP_FPM_GROUP;
+readonly PHP_FPM_USER;
+readonly PHP_VERSION;
+readonly SOURCE_DIRECTORY;
 
 printf -- 'Updating package sources ...\n'
 apt-get --yes -- update 1>/dev/null
