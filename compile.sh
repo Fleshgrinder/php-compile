@@ -55,6 +55,9 @@ PHP_FPM_GROUP='www-data'
 # The bison version required to compile PHP.
 readonly BISON_MAX_VERSION='3.0'
 
+# Whether to perform an apt-get update or not.
+APT_GET_UPDATE=true
+
 # Absolute path to the configuration files.
 CONFIGURATION_DIRECTORY='/etc/php'
 
@@ -103,6 +106,7 @@ Compile and install PHP from source.
     -c  Configuration directory, defaults to ${YELLOW}${CONFIGURATION_DIRECTORY}${NORMAL}.
     -g  PHP-FPM group, defaults to ${YELLOW}${PHP_FPM_GROUP}${NORMAL}.
     -h  Display this help and exit.
+    -n  No apt-get update.
     -s  Source directory, defaults to ${YELLOW}${SOURCE_DIRECTORY}${NORMAL}.
     -u  PHP-FPM username, defaults to ${YELLOW}${PHP_FPM_USER}${NORMAL}.
     -v  PHP version, defaults to ${YELLOW}${PHP_VERSION}${NORMAL}.
@@ -118,12 +122,13 @@ EOT
 # ------------------------------------------------------------------------------
 
 # Check for possibly passed options.
-while getopts 'c:g:hs:u:v:' OPT
+while getopts 'c:g:hns:u:v:' OPT
 do
     case "${OPT}" in
         c) CONFIGURATION_DIRECTORY="${OPTARG}" ;;
         g) PHP_FPM_GROUP="${OPTARG}" ;;
         h) usage && exit 0 ;;
+        n) APT_GET_UPDATE=false ;;
         s) SOURCE_DIRECTORY="${OPTARG}" ;;
         u) PHP_FPM_USER="${OPTARG}" ;;
         v) PHP_VERSION="${OPTARG}" ;;
@@ -140,14 +145,18 @@ if [ "${1}" = "--" ]
 fi
 
 # Make all variables read only.
+readonly APT_GET_UPDATE;
 readonly CONFIGURATION_DIRECTORY;
 readonly PHP_FPM_GROUP;
 readonly PHP_FPM_USER;
 readonly PHP_VERSION;
 readonly SOURCE_DIRECTORY;
 
-printf -- 'Updating package sources ...\n'
-apt-get --yes -- update 1>/dev/null
+if [ ${APT_GET_UPDATE} = true ]
+then
+    printf -- 'Updating package sources ...\n'
+    apt-get --yes -- update 1>/dev/null
+fi
 
 printf -- 'Installing dependencies ...\n'
 apt-get --yes -- install \
@@ -199,14 +208,8 @@ cd -- "${SOURCE_DIRECTORY}"
 readonly PHP_SOURCE="${SOURCE_DIRECTORY}/php"
 
 # Checkout PHP source files.
-if [ -d "${PHP_SOURCE}/.git" ]
-then
-    cd -- "${PHP_SOURCE}"
-    git checkout "PHP-${PHP_VERSION}"
-else
-    rm --recursive --force -- "${PHP_SOURCE}"
-    git clone --branch "PHP-${PHP_VERSION}" --depth 1 --single-branch -- https://github.com/php/php-src.git "${PHP_SOURCE}"
-fi
+rm --recursive --force -- "${PHP_SOURCE}"
+git clone --branch "PHP-${PHP_VERSION}" --depth 1 --single-branch -- https://github.com/php/php-src.git "${PHP_SOURCE}"
 
 # Make sure all files belong to the root user.
 chown --recursive -- root:root "${PHP_SOURCE}"
