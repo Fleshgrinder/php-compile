@@ -94,6 +94,7 @@ install_bison()
     dpkg -i 'libbison-dev_2.7.1.dfsg-1_amd64.deb'
     dpkg -i 'bison_2.7.1.dfsg-1_amd64.deb'
     rm --force -- 'libbison-dev_2.7.1.dfsg-1_amd64.deb' 'bison_2.7.1.dfsg-1_amd64.deb'
+    apt-mark hold bison
 }
 
 # Print usage text.
