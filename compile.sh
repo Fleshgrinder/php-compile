@@ -226,7 +226,6 @@ cd -- "${PHP_SOURCE}"
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
 CPPFLAGS="${CFLAGS}" \
 LDFLAGS='' \
-EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions" \
 ./configure \
     --disable-cli \
     --disable-cgi \
@@ -273,7 +272,6 @@ rm --force -- "${CONFIGURATION_DIRECTORY}/php-fpm.conf.default"
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
 CPPFLAGS="${CFLAGS}" \
 LDFLAGS='' \
-EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions" \
 ./configure \
     --disable-cgi \
     --disable-rpath \
