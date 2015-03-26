@@ -264,6 +264,8 @@ make clean
 make
 make install
 
+rm --force -- "${CONFIGURATION_DIRECTORY}/php-fpm.conf.default"
+
 cat << EOT
 
 [${GREEN}ok${NORMAL}] Installation finished.
