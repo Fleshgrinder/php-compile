@@ -40,32 +40,35 @@ SHELL = /bin/sh
 .SUFFIXES:
 
 COMPOSER_BIN        := /usr/local/bin/composer
-SRC_DIR             := /usr/local/src
 PHP_CONFIGURATION   := /etc/php
-PHP_FPM_INIT_SCRIPT := $(SRC_DIR)/php-fpm-sysvinit-script
+PHP_FPM_INIT_SCRIPT := /usr/local/src/php-fpm-sysvinit-script
 
 all:
-	make install composer
+	make -- php composer
 
 install:
+	make -- php composer
+
+uninstall:
+	make -- uninstall-php uninstall-composer
+
+php:
 	git clone https://github.com/Fleshgrinder/php-configuration.git '$(PHP_CONFIGURATION)' 2>&- || git -C '$(PHP_CONFIGURATION)' pull
 	make -C '$(PHP_CONFIGURATION)' install
 	git clone https://github.com/Fleshgrinder/php-fpm-sysvinit-script.git '$(PHP_FPM_INIT_SCRIPT)' 2>&- || git -C '$(PHP_FPM_INIT_SCRIPT)' pull
 	make -C '$(PHP_FPM_INIT_SCRIPT)'
 	sh ./compile.sh
 
-uninstall:
-	make uninstall-composer
+uninstall-php:
 	[ ! -d '$(PHP_CONFIGURATION)' ] || make -C '$(PHP_CONFIGURATION)' uninstall
 	[ ! -d '$(PHP_FPM_INIT_SCRIPT)' ] || make -C '$(PHP_FPM_INIT_SCRIPT)' uninstall
 	for BIN in $(shell which pear peardev pecl phar phar.phar php php-cgi php-config phpize php-fpm); do rm --force recursive -- "$${BIN}"; done
 	rm --force --recursive -- '$(SRC_DIR)/php' '$(PHP_CONFIGURATION)' '$(PHP_FPM_INIT_SCRIPT)' /usr/local/lib/php /tmp/pear
 
 composer:
-	@which php || echo 'PHP is not insalled, please execute `make` or `make install` and try again.' && exit 64
 	wget --quiet --output-document=- -- 'https://getcomposer.org/installer' | php
 	install --mode=0755 --owner=root --group=root --verbose -- ./composer.phar '$(COMPOSER_BIN)'
-	@rm --force -- ./composer.phar
+	rm --force -- ./composer.phar
 
 uninstall-composer:
 	rm --force -- '$(COMPOSER_BIN)'
