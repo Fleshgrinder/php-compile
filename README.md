@@ -1,11 +1,12 @@
 # PHP compile
-Shell script for compiling latest [PHP](https://php.net) from source.
+Shell script for compiling latest [PHP](https://php.net) from source and install [composer](https://getcomposer.org/).
 
-## Usage
+## Install
 ```shell
 cd /usr/local/src
 git clone https://github.com/Fleshgrinder/php-compile
-sh php-compile/compile.sh
+cd php-compile
+make
 ```
 
 ## Executables
@@ -28,6 +29,7 @@ The following extensions are enabled beside the [core extensions]
 * [JSON](https://php.net/book.json)
 * [libxml](https://php.net/book.libxml)
 * [Mcrypt](https://php.net/book.mcrypt)
+* [MongoDB](https://php.net/book.mongodb)
 * [Multibyte String](https://php.net/book.mbstring)
 * [Mysqli](https://php.net/book.mysqli) with [Mysqlnd](https://php.net/book.mysqlnd)
 * [OpenSSL](https://php.net/book.openssl)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # ------------------------------------------------------------------------------
 # This is free and unencumbered software released into the public domain.
@@ -36,8 +36,6 @@
 # LINK: http://richard.fussenegger.info/
 # ------------------------------------------------------------------------------
 
-# Check return status of every command.
-set -e
 
 # ------------------------------------------------------------------------------
 #                                                    User configurable variables
@@ -226,6 +224,7 @@ cd -- "${PHP_SOURCE}"
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
 CPPFLAGS="${CFLAGS}" \
 LDFLAGS='' \
+EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions"
 ./configure \
     --disable-rpath \
     --disable-short-tags \
@@ -249,6 +248,7 @@ LDFLAGS='' \
     --with-gmp \
     --with-jpeg-dir \
     --with-mcrypt \
+    --with-mongodb \
     --with-mysqli=mysqlnd \
     --with-openssl \
     --with-pdo-mysql=mysqlnd \
