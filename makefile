@@ -49,7 +49,7 @@ install:
 	cd /etc/php && make
 	git clone https://github.com/Fleshgrinder/php-fpm-sysvinit-script.git ../php-fpm-sysvinit-script || git -C ../php-fpm-sysvinit-script pull
 	cd ../php-fpm-sysvinit-script && make
-	./compile.sh
+	sh ./compile.sh
 
 clean:
 	rm --force --recursive -- ../php
