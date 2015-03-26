@@ -219,13 +219,17 @@ cd -- "${PHP_SOURCE}"
 # Make sure the configure script is up-to-date (only necessary if building from git).
 ./buildconf --force
 
-# Have a loot at the following page for available extensions:
+# Build php-fpm.
+#
+# Have a look at the following page for available extensions:
 # https://php.net/extensions.membership
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
 CPPFLAGS="${CFLAGS}" \
 LDFLAGS='' \
-EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions"
+EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions" \
 ./configure \
+    --disable-cli \
+    --disable-cgi \
     --disable-rpath \
     --disable-short-tags \
     --enable-bcmath \
@@ -240,7 +244,7 @@ EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions"
     --enable-zip \
     --sysconfdir="${CONFIGURATION_DIRECTORY}" \
     --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
-    --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/conf-enabled" \
+    --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/fpm-enabled" \
     --with-curl \
     --with-fpm-group="${PHP_FPM_GROUP}" \
     --with-fpm-user="${PHP_FPM_USER}" \
@@ -265,6 +269,50 @@ make
 make install
 
 rm --force -- "${CONFIGURATION_DIRECTORY}/php-fpm.conf.default"
+
+# Build php-cli and pear.
+CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
+CPPFLAGS="${CFLAGS}" \
+LDFLAGS='' \
+EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions" \
+./configure \
+    --disable-cgi \
+    --disable-rpath \
+    --disable-short-tags \
+    --enable-bcmath \
+    --enable-exif \
+    --enable-inline-optimization \
+    --enable-intl \
+    --enable-libgcc \
+    --enable-mbstring \
+    --enable-pcntl \
+    --enable-re2c-cgoto \
+    --enable-zip \
+    --sysconfdir="${CONFIGURATION_DIRECTORY}" \
+    --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
+    --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/cli-enabled" \
+    --with-curl \
+    --with-fpm-group="${PHP_FPM_GROUP}" \
+    --with-fpm-user="${PHP_FPM_USER}" \
+    --with-gd \
+    --with-gmp \
+    --with-jpeg-dir \
+    --with-mcrypt \
+    --with-mongodb \
+    --with-mysqli=mysqlnd \
+    --with-openssl \
+    --with-pdo-mysql=mysqlnd \
+    --with-pdo-pgsql \
+    --with-pear \
+    --with-pgsql \
+    --with-png-dir \
+    --with-tidy \
+    --with-zlib \
+    --with-zlib-dir
+
+make clean
+make
+make install
 
 cat << EOT
 
