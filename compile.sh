@@ -257,7 +257,6 @@ EXTENSION_DIR="${CONFIGURATION_DIRECTORY}/extensions" \
     --with-openssl \
     --with-pdo-mysql=mysqlnd \
     --with-pdo-pgsql \
-    --with-pear \
     --with-pgsql \
     --with-png-dir \
     --with-tidy \

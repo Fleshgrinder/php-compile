@@ -39,32 +39,33 @@
 SHELL = /bin/sh
 .SUFFIXES:
 
-COMPOSER_BIN := /usr/local/bin/composer
-GIT_CLONE_PHP_CONFIGURATION := git clone https://github.com/Fleshgrinder/php-configuration.git /etc/php
-GIT_CLONE_PHP_FPM_INIT_SCRIPT := git clone https://github.com/Fleshgrinder/php-fpm-sysvinit-script.git ../php-fpm-sysvinit-script
+COMPOSER_BIN        := /usr/local/bin/composer
+SRC_DIR             := /usr/local/src
+PHP_CONFIGURATION   := /etc/php
+PHP_FPM_INIT_SCRIPT := $(SRC_DIR)/php-fpm-sysvinit-script
 
 all:
 	make install composer
 
 install:
-	$(GIT_CLONE_PHP_CONFIGURATION) || git -C /etc/php pull
-	cd /etc/php && make
-	$(GIT_CLONE_PHP_FPM_INIT_SCRIPT) || git -C ../php-fpm-sysvinit-script pull
-	cd ../php-fpm-sysvinit-script && make
+	git clone https://github.com/Fleshgrinder/php-configuration.git '$(PHP_CONFIGURATION)' 2>&- || git -C '$(PHP_CONFIGURATION)' pull
+	make -C '$(PHP_CONFIGURATION)' install
+	git clone https://github.com/Fleshgrinder/php-fpm-sysvinit-script.git '$(PHP_FPM_INIT_SCRIPT)' 2>&- || git -C '$(PHP_FPM_INIT_SCRIPT)' pull
+	make -C '$(PHP_FPM_INIT_SCRIPT)'
 	sh ./compile.sh
 
 uninstall:
-	[ -d /etc/php ] || $(GIT_CLONE_PHP_CONFIGURATON)
-	cd /etc/php && make clean
-	[ -d ../php-fpm-sysvinit-script ] || $(GIT_CLONE_PHP_FPM_INIT_SCRIPT)
-	cd ../php-fpm-sysvinit-script && make clean
-	rm --force --recursive -- ../php ../php-fpm-sysvinit-script /etc/php /usr/local/lib/php /tmp/pear
-	for BIN in $(shell which php php-cgi php-config php-fpm phpize pear pecl); do rm --force recursive -- $(BIN); done
+	make uninstall-composer
+	[ ! -d '$(PHP_CONFIGURATION)' ] || make -C '$(PHP_CONFIGURATION)' uninstall
+	[ ! -d '$(PHP_FPM_INIT_SCRIPT)' ] || make -C '$(PHP_FPM_INIT_SCRIPT)' uninstall
+	for BIN in $(shell which pear peardev pecl phar phar.phar php php-cgi php-config phpize php-fpm); do rm --force recursive -- "$${BIN}"; done
+	rm --force --recursive -- '$(SRC_DIR)/php' '$(PHP_CONFIGURATION)' '$(PHP_FPM_INIT_SCRIPT)' /usr/local/lib/php /tmp/pear
 
 composer:
-	wget --quiet --output-document=- -- https://getcomposer.org/installer | php
-	install --mode=0755 --owner=root --group=root --verbose -- ./composer.phar $(COMPOSER_BIN)
+	@which php || echo 'PHP is not insalled, please execute `make` or `make install` and try again.' && exit 64
+	wget --quiet --output-document=- -- 'https://getcomposer.org/installer' | php
+	install --mode=0755 --owner=root --group=root --verbose -- ./composer.phar '$(COMPOSER_BIN)'
 	@rm --force -- ./composer.phar
 
 uninstall-composer:
-	rm --force -- $(COMPOSER_BIN)
+	rm --force -- '$(COMPOSER_BIN)'
