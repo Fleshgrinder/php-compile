@@ -181,8 +181,8 @@ then
     printf -- 'Found bison binary ...\n'
 
     # Get the version fromt he installed bison binary and remove the dots.
-    BISON_VERSION=$(bison --version | grep --only-matching -- '[0-9]\.[0-9]' | tr --delete .)
-    if [ "${BISON_VERSION}" -ge $(tr --delete \. "${BISON_MAX_VERSION}") ]
+    BISON_VERSION=$(bison --version | grep --only-matching -- '[0-9]\.[0-9]' | tr --delete -- '.')
+    if [ "${BISON_VERSION}" -ge $(printf -- '%s' "${BISON_MAX_VERSION}" | tr --delete -- '.') ]
     then
         printf -- 'Installed bison version exceeds maximum version %s!\n' "${RED}${BISON_MAX_VERSION}${NORMAL}"
         printf -- 'Purging bison installation.\n'
