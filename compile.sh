@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 
 # ------------------------------------------------------------------------------
 # This is free and unencumbered software released into the public domain.
@@ -35,6 +35,10 @@
 # LICENSE: http://unlicense.org/ PD
 # LINK: http://richard.fussenegger.info/
 # ------------------------------------------------------------------------------
+
+
+# Exit on any error.
+set -e
 
 
 # ------------------------------------------------------------------------------
@@ -188,6 +192,8 @@ then
         printf -- 'Purging bison installation.\n'
         apt-get --yes -- purge bison
         install_bison
+    else
+        printf -- 'Install bison version is fine for PHP.\n'
     fi
 else
     printf -- 'Installing bison %s2.7.1%s ...\n' "${GREEN}" "${NORMAL}"
@@ -250,6 +256,7 @@ LDFLAGS='' \
     --with-gd \
     --with-gmp \
     --with-jpeg-dir \
+    --with-libdir=/lib/x86_64-linux-gnu \
     --with-mcrypt \
     --with-mongodb \
     --with-mysqli=mysqlnd \
@@ -294,6 +301,7 @@ LDFLAGS='' \
     --with-gd \
     --with-gmp \
     --with-jpeg-dir \
+    --with-libdir=/lib/x86_64-linux-gnu \
     --with-mcrypt \
     --with-mongodb \
     --with-mysqli=mysqlnd \
