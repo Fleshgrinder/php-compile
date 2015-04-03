@@ -45,8 +45,9 @@ set -e
 #                                                    User configurable variables
 # ------------------------------------------------------------------------------
 
+
 # Version string of the PHP release that should be compiled and installed.
-PHP_VERSION='5.6.7'
+PHP_VERSION='5'
 
 # PHP-FPM system user.
 PHP_FPM_USER='www-data'
@@ -66,9 +67,11 @@ CONFIGURATION_DIRECTORY='/etc/php'
 # Absolute path to the directory where source files should be kept.
 SOURCE_DIRECTORY='/usr/local/src'
 
+
 # ------------------------------------------------------------------------------
 #                                                               System variables
 # ------------------------------------------------------------------------------
+
 
 # Make sure that no questions are asked by the operatin system.
 export DEBIAN_FRONTEND='noninteractive'
@@ -78,19 +81,70 @@ readonly __DIRNAME__="$(cd -- "$(dirname -- "${0}")"; pwd)"
 
 # For more information on shell colors and other text formatting see:
 # http://stackoverflow.com/a/4332530/1251219
-readonly RED=$(tput bold; tput setaf 1)
-readonly GREEN=$(tput bold; tput setaf 2)
-readonly YELLOW=$(tput bold; tput setaf 3)
+readonly BLACK=$(tput setaf 0)
+readonly RED=$(tput setaf 1)
+readonly GREEN=$(tput setaf 2)
+readonly YELLOW=$(tput setaf 3)
+readonly BLUE=$(tput setaf 4)
+readonly MAGENTA=$(tput setaf 5)
+readonly CYAN=$(tput setaf 6)
+readonly WHITE=$(tput setaf 7)
+readonly BRIGHT=$(tput dim)
 readonly NORMAL=$(tput sgr0)
+readonly C_EXE=$(tput bold && ${GREEN})
+readonly C_LINK=$(tput bold && ${CYAN})
+readonly C_DIR=$(tput bold && ${BLUE})
+
 
 # ------------------------------------------------------------------------------
 #                                                                      Functions
 # ------------------------------------------------------------------------------
 
-# Install bison 2.7.1
+
+# Print section message.
+#
+# ARGS:
+#   1 - The section's color.
+#   2 - The section's name (should be 4 characters long).
+#   3 - The section's message.
+section()
+{
+    printf -- '%s[%s]%s %s\n' "$1" "$2" "${NORMAL}" "$3"
+}
+
+# Print fail message.
+#
+# ARGS:
+#   1 - The fail message.
+fail()
+{
+    section "${RED}" 'fail' "$1"
+}
+
+# Print info message.
+#
+# ARGS:
+#   1 - The info message.
+info()
+{
+    section "${YELLOW}" 'info' "$1"
+}
+
+# Print OK message.
+#
+# ARGS:
+#   1 - The OK message.
+ok()
+{
+    section "${GREEN}" ' ok ' "$1"
+}
+
+# Install bison.
 install_bison()
 {
     # We need an older version of bison to compile PHP: http://askubuntu.com/a/461961
+    # Note that the version number is hardcoded here, since the links are fixed and not dynamic.
+    info "Installing bison ${GREEN}2.7.1${NORMAL}..."
     wget -- 'http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb'
     wget -- 'http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb'
     dpkg -i 'libbison-dev_2.7.1.dfsg-1_amd64.deb'
@@ -120,9 +174,14 @@ For complete documentation, see: README.md
 EOT
 }
 
+
 # ------------------------------------------------------------------------------
 #                                                                          Logic
 # ------------------------------------------------------------------------------
+
+
+info 'Fetching latest PHP version...'
+PHP_VERSION=$(wget -qO- "https://php.net/releases/index.php?serialize=1&version=${PHP_VERSION}&max=1" | grep -Eo "\"${PHP_VERSION}\.[0-9]+\.[0-9]+\"")
 
 # Check for possibly passed options.
 while getopts 'c:g:hns:u:v:' OPT
@@ -157,11 +216,11 @@ readonly SOURCE_DIRECTORY;
 
 if [ ${APT_GET_UPDATE} = true ]
 then
-    printf -- 'Updating package sources ...\n'
+    info 'Updating package sources...'
     apt-get --yes -- update 1>/dev/null
 fi
 
-printf -- 'Installing dependencies ...\n'
+info 'Installing dependencies...'
 apt-get --yes -- install \
     autoconf             \
     automake             \
@@ -182,21 +241,18 @@ apt-get --yes -- install \
 
 if type bison
 then
-    printf -- 'Found bison binary ...\n'
-
-    # Get the version fromt he installed bison binary and remove the dots.
-    BISON_VERSION=$(bison --version | grep --only-matching -- '[0-9]\.[0-9]' | tr --delete -- '.')
-    if [ "${BISON_VERSION}" -ge $(printf -- '%s' "${BISON_MAX_VERSION}" | tr --delete -- '.') ]
+    # Get the version from the installed bison binary and remove the dots.
+    BISON_VERSION=$(bison --version | grep --only-matching -- '[0-9]\.[0-9]')
+    if [ $(printf -- '%s' "${BISON_VERSION}" | tr --delete -- '.') -ge $(printf -- '%s' "${BISON_MAX_VERSION}" | tr --delete -- '.') ]
     then
-        printf -- 'Installed bison version exceeds maximum version %s!\n' "${RED}${BISON_MAX_VERSION}${NORMAL}"
-        printf -- 'Purging bison installation.\n'
+        fail "Installed bison version exceeds maximum version ${RED}${BISON_MAX_VERSION}${NORMAL}!"
+        info 'Purging bison installation ...'
         apt-get --yes -- purge bison
         install_bison
     else
-        printf -- 'Install bison version is fine for PHP.\n'
+        info "Installed bison version ${GREEN}${BISON_VERSION}${NORMAL} is fine for PHP compilation..."
     fi
 else
-    printf -- 'Installing bison %s2.7.1%s ...\n' "${GREEN}" "${NORMAL}"
     install_bison
 fi
 
@@ -205,7 +261,7 @@ if [ ! -e '/usr/include/gmp.h' ]
     then ln --symbolic '/usr/include/x86_64-linux-gnu/gmp.h' '/usr/include/gmp.h'
 fi
 
-printf -- 'Installing PHP %s ...\n' "${YELLOW}${PHP_VERSION}${NORMAL}"
+info "Installing PHP ${GREEN}${PHP_VERSION}${NORMAL}..."
 
 # Make sure we operate from the correct directory.
 cd -- "${SOURCE_DIRECTORY}"
@@ -225,8 +281,7 @@ cd -- "${PHP_SOURCE}"
 # Make sure the configure script is up-to-date (only necessary if building from git).
 ./buildconf --force
 
-# Build php-fpm.
-#
+info 'Building php-fpm...'
 # Have a look at the following page for available extensions:
 # https://php.net/extensions.membership
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
@@ -275,7 +330,7 @@ make install
 
 rm --force -- "${CONFIGURATION_DIRECTORY}/php-fpm.conf.default"
 
-# Build php-cli and pear.
+info 'Building CLI and PEAR...'
 CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
 CPPFLAGS="${CFLAGS}" \
 LDFLAGS='' \
@@ -321,11 +376,17 @@ make install
 
 cat << EOT
 
-[${GREEN}ok${NORMAL}] Installation finished.
+${GREEN}[ ok ]${NORMAL} Installation finished.
 
-CONFIG: ${YELLOW}${CONFIGURATION_DIRECTORY}${NORMAL}
-
-You may want to delete the source files in ${YELLOW}${SOURCE_DIRECTORY}${NORMAL}.
+CONFIG:     ${C_DIR}${CONFIGURATION_DIRECTORY}${NORMAL}
+PHP-FPM:    ${C_EXE}$(command -v php-fpm)${NORMAL}*
+PHP-CLI:    ${C_EXE}$(command -v php)${NORMAL}*
+PHP-CONFIG: ${C_EXE}$(command -v php-config)${NORMAL}*
+PEAR:       ${C_EXE}$(command -v pear)${NORMAL}*
+PEARDEV:    ${C_EXE}$(command -v peardev)${NORMAL}*
+PECL:       ${C_EXE}$(command -v pecl)${NORMAL}*
+PHAR:       ${C_EXE}$(command -v phar)${NORMAL}*
+PHPIZE:     ${C_EXE}$(command -v phpize)${NORMAL}*
 
 EOT
 
