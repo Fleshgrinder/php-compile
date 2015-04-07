@@ -181,7 +181,7 @@ EOT
 
 
 info 'Fetching latest PHP version...'
-PHP_VERSION=$(wget -qO- "https://php.net/releases/index.php?serialize=1&version=${PHP_VERSION}&max=1" | grep -Eo "\"${PHP_VERSION}\.[0-9]+\.[0-9]+\"")
+PHP_VERSION=$(wget -qO- "https://php.net/releases/index.php?serialize=1&version=${PHP_VERSION}&max=1" | grep -Eo "\"${PHP_VERSION}\.[0-9]+\.[0-9]+\"" | tr -d '"')
 
 # Check for possibly passed options.
 while getopts 'c:g:hns:u:v:' OPT
