@@ -91,9 +91,9 @@ readonly CYAN=$(tput setaf 6)
 readonly WHITE=$(tput setaf 7)
 readonly BRIGHT=$(tput dim)
 readonly NORMAL=$(tput sgr0)
-readonly C_EXE=$(tput bold && ${GREEN})
-readonly C_LINK=$(tput bold && ${CYAN})
-readonly C_DIR=$(tput bold && ${BLUE})
+readonly C_EXE=$(tput bold && "${GREEN}")
+readonly C_LINK=$(tput bold && "${CYAN}")
+readonly C_DIR=$(tput bold && "${BLUE}")
 
 
 # ------------------------------------------------------------------------------
