@@ -225,6 +225,7 @@ apt-get --yes -- install \
     autoconf             \
     automake             \
     build-essential      \
+    libbz2-dev           \
     libcurl4-openssl-dev \
     libgmp-dev           \
     libicu-dev           \
@@ -295,6 +296,7 @@ LDFLAGS='' \
     --enable-bcmath \
     --enable-exif \
     --enable-fpm \
+    --enable-ftp \
     --enable-inline-optimization \
     --enable-intl \
     --enable-libgcc \
@@ -303,6 +305,7 @@ LDFLAGS='' \
     --enable-re2c-cgoto \
     --enable-zip \
     --sysconfdir="${CONFIGURATION_DIRECTORY}" \
+    --with-bz2 \
     --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
     --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/fpm-enabled" \
     --with-curl \
@@ -340,6 +343,7 @@ LDFLAGS='' \
     --disable-short-tags \
     --enable-bcmath \
     --enable-exif \
+    --enable-ftp \
     --enable-inline-optimization \
     --enable-intl \
     --enable-libgcc \
@@ -348,6 +352,7 @@ LDFLAGS='' \
     --enable-re2c-cgoto \
     --enable-zip \
     --sysconfdir="${CONFIGURATION_DIRECTORY}" \
+    --with-bz2 \
     --with-config-file-path="${CONFIGURATION_DIRECTORY}" \
     --with-config-file-scan-dir="${CONFIGURATION_DIRECTORY}/cli-enabled" \
     --with-curl \

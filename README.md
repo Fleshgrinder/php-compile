@@ -23,11 +23,13 @@ The following extensions are enabled beside the [core extensions]
 (https://php.net/extensions.membership#extensions.membership.core):
 
 - [BC Math](https://php.net/book.bc)
+- [Bzip2](https://php.net/book.bzip2)
 - [Ctype](https://php.net/book.ctype)
 - [cURL](https://php.net/book.curl)
 - [DOM](https://php.net/book.dom)
 - [Exif](https://php.net/book.exif)
 - [Fileinfo](https://php.net/book.fileinfo)
+- [FTP](https://php.net/book.ftp)
 - [GD](https://php.net/book.image)
 - [GMP](https://php.net/book.gmp)
 - [iconv](https://php.net/book.iconv)
