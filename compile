@@ -30,7 +30,7 @@ CONFIGURATION_DIRECTORY='/usr/local/etc/php'
 SOURCE_DIRECTORY='/usr/local/src'
 
 # Additional flags that should be passed to the C compiler.
-readonly PHP_CFLAGS='-O3 -m64 -march=native -pipe -m64'
+readonly PHP_CFLAGS='-Ofast -m64 -march=native -pipe'
 
 
 # ------------------------------------------------------------------------------
