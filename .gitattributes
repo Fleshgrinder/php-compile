@@ -1,1 +1,6 @@
-* text=auto eol=lf
+*           text=auto eol=lf
+.*          text eol=lf
+*.md        text eol=lf
+compile     text eol=lf
+makefile    text eol=lf
+UNLICENSE   text eol=lf

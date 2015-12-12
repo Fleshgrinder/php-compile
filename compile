@@ -67,11 +67,20 @@ CONFIGURATION_DIRECTORY='/etc/php'
 # Absolute path to the directory where source files should be kept.
 SOURCE_DIRECTORY='/usr/local/src'
 
+# Additional flags that should be passed to the C compiler.
+PHP_CFLAGS='-O3 -m64 -march=native -pipe'
+
+# Add 64bit option to C compiler flags if applicable.
+[ $(uname -m) = 'x86_x64' ] && PHP_CFLAGS="${PHP_CFLAGS} -m64"
+
 
 # ------------------------------------------------------------------------------
 #                                                               System variables
 # ------------------------------------------------------------------------------
 
+
+# Used to speed-up compilation time.
+readonly CPU_COUNT="$(grep -c ^processor /proc/cpuinfo)"
 
 # Make sure that no questions are asked by the operatin system.
 export DEBIAN_FRONTEND='noninteractive'
@@ -285,8 +294,8 @@ cd -- "${PHP_SOURCE}"
 info 'Building php-fpm...'
 # Have a look at the following page for available extensions:
 # https://php.net/extensions.membership
-CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
-CPPFLAGS="${CFLAGS}" \
+CFLAGS="${PHP_CFLAGS}" \
+CPPFLAGS="${PHP_CFLAGS}" \
 LDFLAGS='' \
 ./configure \
     --disable-cli \
@@ -328,14 +337,14 @@ LDFLAGS='' \
     --with-zlib-dir
 
 make clean
-make
+make -j ${CPU_COUNT}
 make install
 
 rm --force -- "${CONFIGURATION_DIRECTORY}/php-fpm.conf.default"
 
 info 'Building CLI and PEAR...'
-CFLAGS='-O3 -m64 -march=native -pipe -DMYSQLI_NO_CHANGE_USER_ON_PCONNECT' \
-CPPFLAGS="${CFLAGS}" \
+CFLAGS="${PHP_CFLAGS}" \
+CPPFLAGS="${PHP_CFLAGS}" \
 LDFLAGS='' \
 ./configure \
     --disable-cgi \
@@ -376,7 +385,7 @@ LDFLAGS='' \
     --with-zlib-dir
 
 make clean
-make
+make -j ${CPU_COUNT}
 make install
 
 cat << EOT
