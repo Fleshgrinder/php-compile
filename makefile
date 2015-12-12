@@ -57,7 +57,7 @@ php:
 	make -C '$(PHP_CONFIGURATION)' install
 	git clone https://github.com/Fleshgrinder/php-fpm-sysvinit-script.git '$(PHP_FPM_INIT_SCRIPT)' 2>&- || git -C '$(PHP_FPM_INIT_SCRIPT)' pull
 	make -C '$(PHP_FPM_INIT_SCRIPT)'
-	sh $(CURDIR)/compile.sh
+	sh $(CURDIR)/compile
 
 uninstall-php:
 	[ ! -d '$(PHP_CONFIGURATION)' ] || make -C '$(PHP_CONFIGURATION)' uninstall
