@@ -40,7 +40,7 @@ SHELL = /bin/sh
 .SUFFIXES:
 
 COMPOSER_BIN        := /usr/local/bin/composer
-PHP_CONFIGURATION   := /etc/php
+PHP_CONFIGURATION   := /user/local/etc/php
 PHP_FPM_INIT_SCRIPT := /usr/local/src/php-fpm-sysvinit-script
 
 all:
